@@ -85,6 +85,10 @@ impl Emu {
         self.execute(op);
     }
 
+    pub fn  get_display(&self) -> &[bool] {
+        &self.screen
+    }
+
     fn execute(&mut self, op: u16) {
         let digit1 = (op & 0xF00) >> 12;
         let digit2 = (op & 0x0F00) >> 8;
