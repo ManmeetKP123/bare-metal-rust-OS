@@ -89,6 +89,17 @@ impl Emu {
         &self.screen
     }
 
+    pub fn keypress(&mut self, idx: usize, pressed: bool){
+        self.keys[idx] = pressed;
+    }
+
+    pub fn load(&mut self, data: &[u8]){
+        let start = START_ADDR as usize;
+        let end = (START_ADDR as usize) + data.len();
+        self.ram[start..end].copy_from_slice(data);
+    }
+
+
     fn execute(&mut self, op: u16) {
         let digit1 = (op & 0xF00) >> 12;
         let digit2 = (op & 0x0F00) >> 8;
@@ -218,8 +229,8 @@ impl Emu {
                 // last digit determines how many rows the sprite will have
                 let num_rows = digit4;
 
-                // keep track of any pixels that were flipped
-                let mut flipped = false;
+                // keep track of any pixels that were _flipped
+                let mut _flipped = false;
 
                 // iterate 
                 for y_line in 0..num_rows {
@@ -229,13 +240,13 @@ impl Emu {
                     // iterate over each column in our row
                     for x_line in 0..8 {
                         // using a mask to fetch current pixel's bit. only flip if a 1
-                        if (pixels & (0xb1000_0000 >> x_line)) != 0 {
+                        if (pixels & (0b1000_0000 >> x_line)) != 0 {
                             // sprites wrap around the screen, so mod
                             let x = (x_coord + x_line) as usize % SCREEN_WIDTH;
                             let y = (y_coord + y_line) as usize % SCREEN_HEIGHT;
 
                             let idx = x + SCREEN_WIDTH * y;
-                            flipped |= self.screen[idx];
+                            _flipped |= self.screen[idx];
                             self.screen[idx] ^= true;
                         }
                     }
@@ -312,7 +323,8 @@ impl Emu {
                 let x = digit2 as usize;
                 let i = self.i_reg as usize;
                 for idx in 0..=x {
-                    self.ram[i + idx] self.v_Reg[idx];
+                    self.ram[i + idx];
+                    self.v_reg[idx];
                 }
             },
             (0xF, _, 6, 5) => {
@@ -322,7 +334,7 @@ impl Emu {
                     self.v_reg[idx] = self.ram[i + idx];
                 }
             },
-            (_, _, _, _) => unimplemented!("Unimplemented opcode: {}")
+            (_, _, _, _) => unimplemented!("Unimplemented opcode: {}", op),
         }
     }
 
